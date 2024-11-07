@@ -53,10 +53,13 @@ func main(){
 	defer db.Close()
 	log.Println("Connected to the database")
 	queries := quiz.New(db)
+
+
 	
 
 	r.POST("/api/questions", routes.CreateQuestion(queries))
 	r.PUT("/api/questions/:id", routes.UpdateQuestion(queries))
+	r.GET("/api/questions/:id", routes.GetRandomQuestions(queries))
 	r.Run() 
 
 }

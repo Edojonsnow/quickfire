@@ -35,3 +35,12 @@ SET question_text = COALESCE($1, question_text),
 WHERE id = $7
 RETURNING *;
 
+
+-- name: GetRandomQuestions :many
+SELECT q.*, qs.id as question_id, qs.question_text, 
+       qs.option_a, qs.option_b, qs.option_c, qs.option_d, qs.correct_option
+FROM quizzes q
+JOIN questions qs ON q.id = qs.quiz_id
+WHERE q.id = $1
+ORDER BY RANDOM()
+LIMIT 5;

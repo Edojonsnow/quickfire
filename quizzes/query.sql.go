@@ -150,6 +150,65 @@ func (q *Queries) GetQuizWithQuestions(ctx context.Context, id int32) ([]GetQuiz
 	return items, nil
 }
 
+const getRandomQuestions = `-- name: GetRandomQuestions :many
+SELECT q.id, q.title, q.description, q.created_at, qs.id as question_id, qs.question_text, 
+       qs.option_a, qs.option_b, qs.option_c, qs.option_d, qs.correct_option
+FROM quizzes q
+JOIN questions qs ON q.id = qs.quiz_id
+WHERE q.id = $1
+ORDER BY RANDOM()
+LIMIT 5
+`
+
+type GetRandomQuestionsRow struct {
+	ID            int32          `json:"id"`
+	Title         string         `json:"title"`
+	Description   sql.NullString `json:"description"`
+	CreatedAt     time.Time      `json:"created_at"`
+	QuestionID    int32          `json:"question_id"`
+	QuestionText  string         `json:"question_text"`
+	OptionA       string         `json:"option_a"`
+	OptionB       string         `json:"option_b"`
+	OptionC       string         `json:"option_c"`
+	OptionD       string         `json:"option_d"`
+	CorrectOption string         `json:"correct_option"`
+}
+
+func (q *Queries) GetRandomQuestions(ctx context.Context, id int32) ([]GetRandomQuestionsRow, error) {
+	rows, err := q.query(ctx, q.getRandomQuestionsStmt, getRandomQuestions, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetRandomQuestionsRow
+	for rows.Next() {
+		var i GetRandomQuestionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.CreatedAt,
+			&i.QuestionID,
+			&i.QuestionText,
+			&i.OptionA,
+			&i.OptionB,
+			&i.OptionC,
+			&i.OptionD,
+			&i.CorrectOption,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listQuizzes = `-- name: ListQuizzes :many
 SELECT id, title, description, created_at FROM quizzes
 ORDER BY created_at DESC

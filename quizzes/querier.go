@@ -14,6 +14,7 @@ type Querier interface {
 	CreateQuiz(ctx context.Context, arg CreateQuizParams) (Quiz, error)
 	GetQuiz(ctx context.Context, id int32) (Quiz, error)
 	GetQuizWithQuestions(ctx context.Context, id int32) ([]GetQuizWithQuestionsRow, error)
+	GetRandomQuestions(ctx context.Context, id int32) ([]GetRandomQuestionsRow, error)
 	ListQuizzes(ctx context.Context) ([]Quiz, error)
 	UpdateQuestion(ctx context.Context, arg UpdateQuestionParams) (Question, error)
 }

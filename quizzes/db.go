@@ -36,6 +36,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getQuizWithQuestionsStmt, err = db.PrepareContext(ctx, getQuizWithQuestions); err != nil {
 		return nil, fmt.Errorf("error preparing query GetQuizWithQuestions: %w", err)
 	}
+	if q.getRandomQuestionsStmt, err = db.PrepareContext(ctx, getRandomQuestions); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRandomQuestions: %w", err)
+	}
 	if q.listQuizzesStmt, err = db.PrepareContext(ctx, listQuizzes); err != nil {
 		return nil, fmt.Errorf("error preparing query ListQuizzes: %w", err)
 	}
@@ -65,6 +68,11 @@ func (q *Queries) Close() error {
 	if q.getQuizWithQuestionsStmt != nil {
 		if cerr := q.getQuizWithQuestionsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getQuizWithQuestionsStmt: %w", cerr)
+		}
+	}
+	if q.getRandomQuestionsStmt != nil {
+		if cerr := q.getRandomQuestionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRandomQuestionsStmt: %w", cerr)
 		}
 	}
 	if q.listQuizzesStmt != nil {
@@ -120,6 +128,7 @@ type Queries struct {
 	createQuizStmt           *sql.Stmt
 	getQuizStmt              *sql.Stmt
 	getQuizWithQuestionsStmt *sql.Stmt
+	getRandomQuestionsStmt   *sql.Stmt
 	listQuizzesStmt          *sql.Stmt
 	updateQuestionStmt       *sql.Stmt
 }
@@ -132,6 +141,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createQuizStmt:           q.createQuizStmt,
 		getQuizStmt:              q.getQuizStmt,
 		getQuizWithQuestionsStmt: q.getQuizWithQuestionsStmt,
+		getRandomQuestionsStmt:   q.getRandomQuestionsStmt,
 		listQuizzesStmt:          q.listQuizzesStmt,
 		updateQuestionStmt:       q.updateQuestionStmt,
 	}

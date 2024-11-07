@@ -2,8 +2,11 @@
 package routes
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	quiz "main/quizzes"
 
@@ -28,6 +31,20 @@ type UpdateQuestionParams struct {
 	OptionD       string `json:"option_d"`
 	CorrectOption string `json:"correct_option"`
 	ID            int32  `json:"id"`
+}
+
+type GetRandomQuestionsRow struct {
+	ID            int32          `json:"id"`
+	Title         string         `json:"title"`
+	Description   sql.NullString `json:"description"`
+	CreatedAt     time.Time      `json:"created_at"`
+	QuestionID    int32          `json:"question_id"`
+	QuestionText  string         `json:"question_text"`
+	OptionA       string         `json:"option_a"`
+	OptionB       string         `json:"option_b"`
+	OptionC       string         `json:"option_c"`
+	OptionD       string         `json:"option_d"`
+	CorrectOption string         `json:"correct_option"`
 }
 
 
@@ -57,7 +74,7 @@ func CreateQuestion(queries quiz.Querier) gin.HandlerFunc {
     }
 }
 
-func UpdateQuestion (queries quiz.Querier) gin.HandlerFunc{
+func UpdateQuestion(queries quiz.Querier) gin.HandlerFunc{
     return func(c *gin.Context){
         var req CreateQuestionRequest
         if err := c.BindJSON(&req); err!= nil {
@@ -87,4 +104,27 @@ func UpdateQuestion (queries quiz.Querier) gin.HandlerFunc{
 
         c.JSON(http.StatusOK, question)
     }
+}
+
+
+func GetRandomQuestions(queries quiz.Querier) (gin.HandlerFunc ){
+
+    return func(c *gin.Context) {
+     
+    
+        id , err:= strconv.Atoi(c.Param("id"))
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid question ID"})
+            return
+        }
+
+
+        randomQuestions, err := queries.GetRandomQuestions(c, int32(id))
+        if err != nil {
+            log.Fatalf("Failed to fetch random questions: %v", err)
+        }
+
+        c.JSON(http.StatusOK, randomQuestions)
+    }
+
 }
