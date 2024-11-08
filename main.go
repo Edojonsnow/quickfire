@@ -60,6 +60,14 @@ func main(){
 	r.POST("/api/questions", routes.CreateQuestion(queries))
 	r.PUT("/api/questions/:id", routes.UpdateQuestion(queries))
 	r.GET("/api/questions/:id", routes.GetRandomQuestions(queries))
+    r.GET("/api/questionsfromquiz/:id", routes.GetQuizWithQuestions(queries))
+
+
+
+	r.POST("/api/quiz", routes.CreateQuiz(queries))
+	r.GET("/api/quiz/:id", routes.GetQuiz(queries))
+	r.GET("/api/quiz", routes.ListQuizzes(queries))
+   
 	r.Run() 
 
 }
